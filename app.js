@@ -1,13 +1,13 @@
+const app = require('express')();
+
 const soap = require('soap');
 const url = 'http://services.aonaware.com/DictService/DictService.asmx?WSDL';
 
-(async () => {
-  try {
-    const client = await soap.createClientAsync(url);
-    const desc = await client.describe();
-    console.log(desc);
 
-  } catch(error) {
-    console.log(error.message);
-  }
-})();
+app.get('/', async (req, res) => {
+  const client = await soap.createClientAsync(url, { overridePromiseSuffix: 'AsyncFunction' });
+  const desc = await client.describe();
+  res.send(desc);
+});
+
+app.listen(7000);
