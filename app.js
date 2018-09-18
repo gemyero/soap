@@ -1,13 +1,18 @@
-const app = require('express')();
-
+const tmp = require('tmp');
+const fs = require('fs');
 const soap = require('soap');
-const url = 'http://services.aonaware.com/DictService/DictService.asmx?WSDL';
 
+// create tmp file
+const tmpobj = tmp.fileSync({ postfix: '.wsdl' });
 
-app.get('/', async (req, res) => {
-  const client = await soap.createClientAsync(url, { overridePromiseSuffix: 'AsyncFunction' });
-  const desc = await client.describe();
-  res.send(desc);
+// read xml and write it to the tmp file
+const xml = fs.readFileSync('DictService.wsdl', 'utf8');
+fs.writeFileSync(tmpobj.name, xml, 'utf8');
+
+// use createClient as usual given url of local path of tmp file and describe it
+soap.createClient(tmpobj.name, (err, client) => {
+  console.log(client.describe());
 });
 
-app.listen(7000);
+// remove tmp file
+tmpobj.removeCallback();
